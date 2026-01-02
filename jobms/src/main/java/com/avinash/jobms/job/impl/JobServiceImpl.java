@@ -10,6 +10,8 @@ import com.avinash.jobms.job.clients.ReviewClient;
 import com.avinash.jobms.job.external.Company;
 import com.avinash.jobms.job.external.Review;
 import com.avinash.jobms.mapper.JobMapper;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,11 +39,18 @@ public class JobServiceImpl implements JobService {
     JobRepository jobRepository;
 
     @Override
+    @CircuitBreaker(name="companyBreaker",fallbackMethod = "companyBreakerFallback")
+//    @Retry(name="companyBreaker",fallbackMethod = "companyBreakerFallback")
     public List<JobDTO> findALl() {
         List<Job> jobs =jobRepository.findAll();
         return jobs.stream().map(this::convertToDto).toList();
     }
 
+    public List<String> companyBreakerFallback(Exception e){
+        List<String> list = new ArrayList<>();
+        list.add("this is an alternative in case of circuit breaker");
+        return list;
+    }
     private JobDTO convertToDto(Job job){
 //        Company company = restTemplate.getForObject("http://COMPANY-SERVICE:8081/companies/"+job.getCompanyId(),Company.class);
         Company company = companyClient.getCompany(job.getCompanyId());
