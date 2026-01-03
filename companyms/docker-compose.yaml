@@ -6,6 +6,8 @@ services:
       POSTGRES_USER: avinash
       POSTGRES_PASSWORD: avinash
       PGDATA: /data/postgres
+      TZ: Asia/Kolkata
+      PGTZ: Asia/Kolkata
     volumes:
       - postgres:/data/postgres
       - ./init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init-multiple-dbs.sql
