@@ -1,5 +1,6 @@
 package com.avinash.reviewms.review;
 
+import com.avinash.reviewms.review.messaging.ReviewMessageProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,9 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
+    @Autowired
+    ReviewMessageProducer reviewMessageProducer;
+
     @GetMapping
     public ResponseEntity<List<Review>> getAllReviews(@RequestParam Long companyId){
         return new ResponseEntity<>(reviewService.getAllReviews(companyId), HttpStatus.OK);
@@ -21,6 +25,7 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<String> addReview(@RequestParam Long companyId,@RequestBody Review review){
       if(reviewService.addReview(companyId,review)) {
+          reviewMessageProducer.sendMessage(review);
           return new ResponseEntity<>("Review Added Successfully!!",HttpStatus.CREATED);
       }
       return new ResponseEntity<>("Review Not Saved, Company not found !!",HttpStatus.NOT_FOUND);
@@ -50,5 +55,11 @@ public class ReviewController {
             return new ResponseEntity<>("Review Deleted Successfully",HttpStatus.OK);
         }
         return new ResponseEntity<>("Review not deleted!!",HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/averageRating")
+    public Double getAverageReview(@RequestParam Long companyId){
+        List<Review> reviewList = reviewService.getAllReviews(companyId);
+        return reviewList.stream().mapToDouble(Review::getRating).average().orElse(0.0);
     }
 }

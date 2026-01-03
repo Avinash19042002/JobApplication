@@ -1,5 +1,7 @@
 package com.avinash.companyms.company;
 
+import com.avinash.companyms.company.dto.ReviewMessage;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -10,4 +12,6 @@ public interface CompanyService{
     boolean deleteCompanyById(Long id);
 
     Optional<Company> getCompanyById(Long id);
+
+    void updateCompanyRating(ReviewMessage reviewMessage);
 }
