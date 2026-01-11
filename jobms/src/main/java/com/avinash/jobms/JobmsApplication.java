@@ -1,5 +1,6 @@
 package com.avinash.jobms;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -15,5 +16,9 @@ public class JobmsApplication {
 		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
 		SpringApplication.run(JobmsApplication.class, args);
 	}
-
+	@PostConstruct
+	public void init() {
+		// Also set after Spring context loads (belt and suspenders)
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
+	}
 }
